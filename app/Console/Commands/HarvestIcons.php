@@ -45,15 +45,27 @@ class HarvestIcons extends Command
         Log::info('Starting IconHarvest');
         
         // Google Material Design Icons
-        $material_icons = $this->fetch($this->files->google);
-        $mi_formatted = $this->formatResult($material_icons, 'material_icons');
+        $material_icons = $this->fetch( 'json', array( 'url' => $this->files->google ) );
+        $mi_formatted   = $this->formatResult( $material_icons, 'material_icons' );
         
         // Font Awesome
-        $font_awesome   = $this->fetch($this->files->fa, 'yaml');
-        $fa_formatted = $this->formatResult($font_awesome, 'fa');
+        $font_awesome   = $this->fetch( 'yaml', array( 'url' => $this->files->fa ) );
+        $fa_formatted   = $this->formatResult( $font_awesome, 'fa' );
         
-        // Merge icons
-        $all_icons = array_merge($mi_formatted, $fa_formatted);
+        // Dashicons
+        $dashicons           = $this->fetch( 'wp' );
+        $dashicons_formatted = $this->formatResult( $dashicons, 'wp' );
+        
+        echo '<pre>';
+        print_r($dashicons_formatted);
+        die;
+        
+        // Merge all icons
+        $all_icons = array_merge(
+            $mi_formatted, 
+            $fa_formatted,
+            $dashicons
+        );
         
         // Loop through all icons
         foreach($all_icons as $i)
@@ -234,6 +246,35 @@ class HarvestIcons extends Command
                 }
                 
             break;
+            case 'wp':
+            
+                // Get icons
+                $icons = $content;
+                
+                // Loop through icons
+                foreach($icons as $key => $value)
+                {
+                    
+                    // Build id
+                    $id = 'wp-' . $key;
+                    
+                    // Build tags
+                    $tags = array('dashicon', 'dashicons', $key, $value);
+                    
+                    // Remove any duplicates
+                    $tags = array_unique($tags);
+                    
+                    // Build array
+                    $formatted[] = array(
+                        'icon_id' => $id,
+                        'code'    => $key,
+                        'type'    => 'wp',
+                        'name'    => ucfirst($value),
+                        'tags'    => implode(' ', $tags)
+                    );
+                }
+            
+            break;
             default:
                 // Invalid provider
                 return false;
@@ -248,22 +289,25 @@ class HarvestIcons extends Command
      *
      * @return array/object
      */
-    private function fetch($url, $type = 'json')
+    private function fetch($type, $args = array())
     {
-        
-        // Fetch content
-        $content = file_get_contents($url);
-        
-        // Check if result is empty
-        if(empty($content))
-        {
-            // TODO: Make trigger to tell me somthing is wrong
-        }
         
         // Detemine resulttype
         switch($type)
         {
             case 'json':
+            
+                // Get url
+                $url = $args['url'];
+            
+                // Fetch content
+                $content = file_get_contents($url);
+        
+                // Check if result is empty
+                if(empty($content))
+                {
+                    // TODO: Make trigger to tell me somthing is wrong
+                }
             
                 // Try decoding
                 if(!$result = json_decode($content))
@@ -278,6 +322,18 @@ class HarvestIcons extends Command
             break;
             case 'yaml':
             
+                // Get url
+                $url = $args['url'];
+            
+                // Fetch content
+                $content = file_get_contents($url);
+    
+                // Check if result is empty
+                if(empty($content))
+                {
+                    // TODO: Make trigger to tell me somthing is wrong
+                }
+            
                 // Defining new parser
                 $yaml = new Parser();
                 
@@ -291,6 +347,239 @@ class HarvestIcons extends Command
                 // Return data
                 return $result;
                 
+            break;
+            case 'wp':
+            
+                // Array of dashicoms (fetched from Types-plugin)
+                $icons = array(
+                    'admin-appearance'        => 'appearance',
+                    'admin-collapse'          => 'collapse',
+                    'admin-comments'          => 'comments',
+                    'admin-generic'           => 'generic',
+                    'admin-home'              => 'home',
+                    'admin-links'             => 'links',
+                    'admin-media'             => 'media',
+                    'admin-network'           => 'network',
+                    'admin-page'              => 'page',
+                    'admin-plugins'           => 'plugins',
+                    'admin-post'              => 'post',
+                    'admin-settings'          => 'settings',
+                    'admin-site'              => 'site',
+                    'admin-tools'             => 'tools',
+                    'admin-users'             => 'users',
+                    'album'                   => 'album',
+                    'align-center'            => 'align center',
+                    'align-left'              => 'align left',
+                    'align-none'              => 'align none',
+                    'align-right'             => 'align right',
+                    'analytics'               => 'analytics',
+                    'archive'                 => 'archive',
+                    'arrow-down-alt2'         => 'down alt2',
+                    'arrow-down-alt'          => 'down alt',
+                    'arrow-down'              => 'down',
+                    'arrow-left-alt2'         => 'left alt2',
+                    'arrow-left-alt'          => 'left alt',
+                    'arrow-left'              => 'left',
+                    'arrow-right-alt2'        => 'right alt2',
+                    'arrow-right-alt'         => 'right alt',
+                    'arrow-right'             => 'right',
+                    'arrow-up-alt2'           => 'up alt2',
+                    'arrow-up-alt'            => 'up alt',
+                    'arrow-up'                => 'up',
+                    'art'                     => 'art',
+                    'awards'                  => 'awards',
+                    'backup'                  => 'backup',
+                    'book-alt'                => 'book alt',
+                    'book'                    => 'book',
+                    'building'                => 'building',
+                    'businessman'             => 'businessman',
+                    'calendar-alt'            => 'calendar alt',
+                    'calendar'                => 'calendar',
+                    'camera'                  => 'camera',
+                    'carrot'                  => 'carrot',
+                    'cart'                    => 'cart',
+                    'category'                => 'category',
+                    'chart-area'              => 'chart area',
+                    'chart-bar'               => 'chart bar',
+                    'chart-line'              => 'chart line',
+                    'chart-pie'               => 'chart pie',
+                    'clipboard'               => 'clipboard',
+                    'clock'                   => 'clock',
+                    'cloud'                   => 'cloud',
+                    'controls-back'           => 'back',
+                    'controls-forward'        => 'forward',
+                    'controls-pause'          => 'pause',
+                    'controls-play'           => 'play',
+                    'controls-repeat'         => 'repeat',
+                    'controls-skipback'       => 'skip back',
+                    'controls-skipforward'    => 'skip forward',
+                    'controls-volumeoff'      => 'volume off',
+                    'controls-volumeon'       => 'volume on',
+                    'dashboard'               => 'dashboard',
+                    'desktop'                 => 'desktop',
+                    'dismiss'                 => 'dismiss',
+                    'download'                => 'download',
+                    'editor-aligncenter'      => 'align center',
+                    'editor-alignleft'        => 'align left',
+                    'editor-alignright'       => 'align right',
+                    'editor-bold'             => 'bold',
+                    'editor-break'            => 'break',
+                    'editor-code'             => 'code',
+                    'editor-contract'         => 'contract',
+                    'editor-customchar'       => 'custom char',
+                    'editor-distractionfree'  => 'distraction free',
+                    'editor-expand'           => 'expand',
+                    'editor-help'             => 'help',
+                    'editor-indent'           => 'indent',
+                    'editor-insertmore'       => 'insert more',
+                    'editor-italic'           => 'italic',
+                    'editor-justify'          => 'justify',
+                    'editor-kitchensink'      => 'kitchen sink',
+                    'editor-ol'               => 'ol',
+                    'editor-outdent'          => 'outdent',
+                    'editor-paragraph'        => 'paragraph',
+                    'editor-paste-text'       => 'paste text',
+                    'editor-paste-word'       => 'paste word',
+                    'editor-quote'            => 'quote',
+                    'editor-removeformatting' => 'remove formatting',
+                    'editor-rtl'              => 'rtl',
+                    'editor-spellcheck'       => 'spellcheck',
+                    'editor-strikethrough'    => 'strike through',
+                    'editor-textcolor'        => 'text color',
+                    'editor-ul'               => 'ul',
+                    'editor-underline'        => 'underline',
+                    'editor-unlink'           => 'unlink',
+                    'editor-video'            => 'video',
+                    'edit'                    => 'edit',
+                    'email-alt'               => 'email alt',
+                    'email'                   => 'email',
+                    'excerpt-view'            => 'excerpt view',
+                    'exerpt-view'             => 'exerpt view',
+                    'external'                => 'external',
+                    'facebook-alt'            => 'facebook alt',
+                    'facebook'                => 'facebook',
+                    'feedback'                => 'feedback',
+                    'flag'                    => 'flag',
+                    'format-aside'            => 'aside',
+                    'format-audio'            => 'audio',
+                    'format-chat'             => 'chat',
+                    'format-gallery'          => 'gallery',
+                    'format-image'            => 'image',
+                    'format-links'            => 'links',
+                    'format-quote'            => 'quote',
+                    'format-standard'         => 'standard',
+                    'format-status'           => 'status',
+                    'format-video'            => 'video',
+                    'forms'                   => 'forms',
+                    'googleplus'              => 'google plus',
+                    'grid-view'               => 'grid view',
+                    'groups'                  => 'groups',
+                    'hammer'                  => 'hammer',
+                    'heart'                   => 'heart',
+                    'id-alt'                  => 'id alt',
+                    'id'                      => 'id',
+                    'images-alt2'             => 'images alt2',
+                    'images-alt'              => 'images alt',
+                    'image-crop'              => 'image crop',
+                    'image-flip-horizontal'   => 'image flip horizontal',
+                    'image-flip-vertical'     => 'image flip vertical',
+                    'image-rotate-left'       => 'image rotate left',
+                    'image-rotate-right'      => 'image rotate right',
+                    'index-card'              => 'index card',
+                    'info'                    => 'info',
+                    'leftright'               => 'left right',
+                    'lightbulb'               => 'light bulb',
+                    'list-view'               => 'list view',
+                    'location-alt'            => 'location alt',
+                    'location'                => 'location',
+                    'lock'                    => 'lock',
+                    'marker'                  => 'marker',
+                    'media-archive'           => 'media archive',
+                    'media-audio'             => 'media audio',
+                    'media-code'              => 'media code',
+                    'media-default'           => 'media default',
+                    'media-document'          => 'media document',
+                    'media-interactive'       => 'media interactive',
+                    'media-spreadsheet'       => 'media spreadsheet',
+                    'media-text'              => 'media text',
+                    'media-video'             => 'media video',
+                    'megaphone'               => 'megaphone',
+                    'menu'                    => 'menu',
+                    'microphone'              => 'microphone',
+                    'migrate'                 => 'migrate',
+                    'minus'                   => 'minus',
+                    'money'                   => 'money',
+                    'nametag'                 => 'name tag',
+                    'networking'              => 'networking',
+                    'no-alt'                  => 'no alt',
+                    'no'                      => 'no',
+                    'palmtree'                => 'palm tree',
+                    'performance'             => 'performance',
+                    'phone'                   => 'phone',
+                    'playlist-audio'          => 'playlist audio',
+                    'playlist-video'          => 'playlist video',
+                    'plus-alt'                => 'plus alt',
+                    'plus'                    => 'plus',
+                    'portfolio'               => 'portfolio',
+                    'post-status'             => 'post status',
+                    'post-trash'              => 'post trash',
+                    'pressthis'               => 'press this',
+                    'products'                => 'products',
+                    'randomize'               => 'randomize',
+                    'redo'                    => 'redo',
+                    'rss'                     => 'rss',
+                    'schedule'                => 'schedule',
+                    'screenoptions'           => 'screen options',
+                    'search'                  => 'search',
+                    'share1'                  => 'share1',
+                    'share-alt2'              => 'share alt2',
+                    'share-alt'               => 'share alt',
+                    'share'                   => 'share',
+                    'shield-alt'              => 'shield alt',
+                    'shield'                  => 'shield',
+                    'slides'                  => 'slides',
+                    'smartphone'              => 'smartphone',
+                    'smiley'                  => 'smiley',
+                    'sort'                    => 'sort',
+                    'sos'                     => 'sos',
+                    'star-empty'              => 'star empty',
+                    'star-filled'             => 'star filled',
+                    'star-half'               => 'star half',
+                    'store'                   => 'store',
+                    'tablet'                  => 'tablet',
+                    'tagcloud'                => 'tag cloud',
+                    'tag'                     => 'tag',
+                    'testimonial'             => 'testimonial',
+                    'text'                    => 'text',
+                    'tickets-alt'             => 'tickets alt',
+                    'tickets'                 => 'tickets',
+                    'translation'             => 'translation',
+                    'trash'                   => 'trash',
+                    'twitter'                 => 'twitter',
+                    'undo'                    => 'undo',
+                    'universal-access-alt'    => 'universal access alt',
+                    'universal-access'        => 'universal access',
+                    'update'                  => 'update',
+                    'upload'                  => 'upload',
+                    'vault'                   => 'vault',
+                    'video-alt2'              => 'video alt2',
+                    'video-alt3'              => 'video alt3',
+                    'video-alt'               => 'video alt',
+                    'visibility'              => 'visibility',
+                    'welcome-add-page'        => 'add page',
+                    'welcome-comments'        => 'comments',
+                    'welcome-edit-page'       => 'edit page',
+                    'welcome-learn-more'      => 'learn more',
+                    'welcome-view-site'       => 'view site',
+                    'welcome-widgets-menus'   => 'widgets menus',
+                    'welcome-write-blog'      => 'write blog',
+                    'wordpress-alt'           => 'wordpress alt',
+                    'wordpress'               => 'wordpress',
+                    'yes'                     => 'yes',
+                );
+                
+                return $icons;
+            
             break;
         }
         return false;
