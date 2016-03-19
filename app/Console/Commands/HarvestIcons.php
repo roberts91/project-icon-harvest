@@ -56,15 +56,11 @@ class HarvestIcons extends Command
         $dashicons           = $this->fetch( 'wp' );
         $dashicons_formatted = $this->formatResult( $dashicons, 'wp' );
         
-        echo '<pre>';
-        print_r($dashicons_formatted);
-        die;
-        
         // Merge all icons
         $all_icons = array_merge(
             $mi_formatted, 
             $fa_formatted,
-            $dashicons
+            $dashicons_formatted
         );
         
         // Loop through all icons
@@ -85,6 +81,10 @@ class HarvestIcons extends Command
                 
                 // Insert
                 $icon->firstOrCreate($i);
+                
+                // Log
+                Log::info('New icon: ' . $i['name']);
+                
             }
             else
             {
@@ -102,9 +102,14 @@ class HarvestIcons extends Command
                 // Check if we got diff
                 if(is_array($diff) AND count($diff) > 0)
                 {
+                    
+                    // Log
+                    Log::info('Updating icon: ' . $i['name']);
+                    
                     // Update
                     $icon->fill($i);
                     $icon->save();
+                    
                 }
             }
         }
