@@ -25,6 +25,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('harvesticons')->dailyAt('12:39');
+        $schedule->command('harvesticons');//->daily();
     }
 }
