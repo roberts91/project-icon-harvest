@@ -55,12 +55,17 @@ class HarvestIcons extends Command
         // Dashicons
         $dashicons           = $this->fetch( 'wp' );
         $dashicons_formatted = $this->formatResult( $dashicons, 'wp' );
+
+        // 7 Stroke
+        $seven_stroke           = $this->fetch( 'raw', array( 'url' => $this->files->{'7-stroke'} ) );
+        $seven_stroke_formatted = $this->formatResult( $seven_stroke, '7-stroke' );
         
         // Merge all icons
         $all_icons = array_merge(
             $mi_formatted, 
             $fa_formatted,
-            $dashicons_formatted
+            $dashicons_formatted,
+            $seven_stroke_formatted
         );
         
         // Loop through all icons
@@ -126,8 +131,9 @@ class HarvestIcons extends Command
     private function get_files()
     {
         return (object) [
-            'google' => 'https://raw.githubusercontent.com/google/material-design-icons/master/iconfont/MaterialIcons-Regular.ijmap',
-            'fa'     => 'https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/src/icons.yml'
+            'google'   => 'https://raw.githubusercontent.com/google/material-design-icons/master/iconfont/MaterialIcons-Regular.ijmap',
+            'fa'       => 'https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/src/icons.yml',
+            '7-stroke' => storage_path('app/public/fonts/pixeden-7-stroke-_variables.scss'),
         ];
     }
     
@@ -204,6 +210,48 @@ class HarvestIcons extends Command
                     );
                 }
                 
+            break;
+            case '7-stroke':
+                
+                // Explode to lines
+                $lines = explode(PHP_EOL, $content);
+
+                // Loop through lines
+                foreach($lines as $line)
+                {
+                    // Check if is an icon
+                    if(preg_match('/\$font-var-/', $line))
+                    {
+                        
+                        // Extract values
+                        preg_match('/^\$font-var-([a-z0-9]+)\: \"\\\([a-z0-9]+)\";/', $line, $matches);
+                        
+                        // Skip if we did not get correct result
+                        if(count($matches) != 3) continue;
+                        
+                        // Extract to values
+                        list($string, $name, $code) = $matches;
+                        
+                        // Make name friendly
+                        $friendly_name = preg_replace('/([0-9]+)/', ' $1', $name);
+                        $friendly_name = preg_replace('/-/', ' ', $friendly_name);
+                        $friendly_name = ucfirst($friendly_name);
+                        
+                        // Build ID
+                        $id = '7s-' . $code;
+                    
+                        // Build array
+                        $formatted[] = array(
+                            'icon_id' => $id,
+                            'code'    => $name,
+                            'type'    => '7-stroke',
+                            'name'    => $friendly_name,
+                            'tags'    => null
+                        );
+                        
+                    }
+                }
+            
             break;
             case 'fa':
             
@@ -352,6 +400,18 @@ class HarvestIcons extends Command
                 // Return data
                 return $result;
                 
+            break;
+            case 'raw':
+            
+                // Get url
+                $url = $args['url'];
+        
+                // Fetch content
+                $content = file_get_contents($url);
+                
+                // Return content
+                return $content;
+            
             break;
             case 'wp':
             
