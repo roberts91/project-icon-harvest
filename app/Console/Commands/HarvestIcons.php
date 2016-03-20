@@ -232,13 +232,20 @@ class HarvestIcons extends Command
                         // Extract to values
                         list($string, $name, $code) = $matches;
                         
-                        // Make name friendly
-                        $friendly_name = preg_replace('/([0-9]+)/', ' $1', $name);
-                        $friendly_name = preg_replace('/-/', ' ', $friendly_name);
-                        $friendly_name = ucfirst($friendly_name);
-                        
                         // Build ID
                         $id = '7s-' . $code;
+                        
+                        // Insert whitespace between text and numbers
+                        $friendly_name = preg_replace('/([0-9]+)/', ' $1', $name);
+                        
+                        // Replace hyphens with whitespace
+                        $friendly_name = preg_replace('/-/', ' ', $friendly_name);
+                        
+                        // Remove multiple whitespaces
+                        $friendly_name = preg_replace('/\s+/', ' ', $friendly_name);
+                        
+                        // Capitalize first letter
+                        $friendly_name = ucfirst($friendly_name);
                     
                         // Build array
                         $formatted[] = array(
