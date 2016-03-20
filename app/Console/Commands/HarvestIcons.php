@@ -413,6 +413,12 @@ class HarvestIcons extends Command
                 // Get url
                 $url = $args['url'];
         
+                // Checj if file exists
+                if(!file_exists($url))
+                {
+                    return false;
+                }
+        
                 // Fetch content
                 $content = file_get_contents($url);
                 
