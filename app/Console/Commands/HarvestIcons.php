@@ -183,6 +183,9 @@ class HarvestIcons extends Command
         // Remove multiple whitespaces
         $name = preg_replace('/\s+/', ' ', $name);
 
+        // Trim whitespace from both sides
+        $name = trim($name);
+
         // Capitalize first letter
         $name = ucfirst($name);
         
