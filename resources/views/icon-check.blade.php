@@ -35,22 +35,37 @@
                 font-family: 'Lato';
             }
             
+            .dashicons {
+                height: auto;
+                width: auto;
+            }
+            
             .icons {
                 width:100%;
                 clear:both;
-                display:block;
             }
             
             .icons .icon {
+                display: block;
                 padding: 5px;
-                float:left;
-                display:block;
-                width: 50px;
-                height:50px;
-                text-align:center;
+                float: left;
+                width: 100px;
+                height: 165px;
+                text-align: center;
             }
             
-            .icons .icon > * {
+            .icons .icon p {
+                font-size: 10px;
+                font-family: 'Lato';
+            }
+            
+            .icons .icon p.name {
+                font-family: 'Lato';
+                font-size: 14px;
+            }
+            
+            .icons .icon > span,
+            .icons .icon > i {
                 font-size:42px !important;
             }
 
@@ -68,12 +83,16 @@
         <small>Project Icon Harvest</small>
         
         <h2>Total count: {{ $icon_count }}</h2>
-            
+        
+        <div class="icons-outer">
+        
         <h2>Font Awesome ({{ count($icons->fa) }})</h2>
         <div class="icons">
             @foreach ($icons->fa as $icon)
             <div class="icon" title="{{ $icon->name }}">
                 <i class="fa fa-{{ $icon->code }}"></i>
+                <p class="name">{{ $icon->name }}</p>
+                <p>{{ $icon->tags }}</p>
             </div>
             @endforeach
         </div>
@@ -85,6 +104,8 @@
             @foreach ($icons->gmi as $icon)
             <div class="icon" title="{{ $icon->name }}">
                 <i class="material-icons">&#x{{ $icon->code }};</i>
+                <p class="name">{{ $icon->name }}</p>
+                <p>{{ $icon->tags }}</p>
             </div>
             @endforeach
         </div>
@@ -96,6 +117,8 @@
             @foreach ($icons->{'7-stroke'} as $icon)
             <div class="icon" title="{{ $icon->name }}">
                 <i class="pe-7s-{{ $icon->code }}"></i>
+                <p class="name">{{ $icon->name }}</p>
+                <p>{{ $icon->tags }}</p>
             </div>
             @endforeach
         </div>
@@ -107,8 +130,12 @@
             @foreach ($icons->dashicons as $icon)
             <div class="icon" title="{{ $icon->name }}">
                 <span class="dashicons dashicons-{{ $icon->code }}"></span>
+                <p class="name">{{ $icon->name }}</p>
+                <p>{{ $icon->tags }}</p>
             </div>
             @endforeach
+        </div>
+        
         </div>
         
     </body>

@@ -158,6 +158,30 @@ class HarvestIcons extends Command
         // Return passed words
         return $passed;
     }
+    
+    /**
+     * Make name search-friendly
+     *
+     * @return string
+     */
+    private function fixName($name)
+    {
+        // Insert whitespace between text and numbers
+        $name = preg_replace('/([0-9]+)/', ' $1', $name);
+
+        // Replace hyphens with whitespace
+        $name = preg_replace('/-/', ' ', $name);
+
+        // Remove multiple whitespaces
+        $name = preg_replace('/\s+/', ' ', $name);
+
+        // Capitalize first letter
+        $name = ucfirst($name);
+        
+        // Return name
+        return $name;
+        
+    }
 
     /**
      * Format icon-result based on which provder
@@ -183,8 +207,8 @@ class HarvestIcons extends Command
                 foreach($icons as $key => $value)
                 {
                     
-                    // Get name
-                    $name = $value->name;
+                    // Make name search-friendly
+                    $name = $this->fixName($value->name);
                     
                     // Build array
                     $formatted[] = array(
@@ -215,18 +239,9 @@ class HarvestIcons extends Command
                 
                         // Extract to values
                         list($string, $name, $code) = $matches;
-                
-                        // Insert whitespace between text and numbers
-                        $friendly_name = preg_replace('/([0-9]+)/', ' $1', $name);
-                
-                        // Replace hyphens with whitespace
-                        $friendly_name = preg_replace('/-/', ' ', $friendly_name);
-                
-                        // Remove multiple whitespaces
-                        $friendly_name = preg_replace('/\s+/', ' ', $friendly_name);
-                
-                        // Capitalize first letter
-                        $friendly_name = ucfirst($friendly_name);
+                        
+                        // Make name search-friendly 
+                        $friendly_name = $this->fixName($name);
             
                         // Build array
                         $formatted[] = array(
@@ -274,11 +289,14 @@ class HarvestIcons extends Command
                     // Remove duplicates
                     $tags = array_unique($tags);
                     
+                    // Make name search-friendly 
+                    $friendly_name = $this->fixName($icon['name']);
+                    
                     // Build array
                     $formatted[] = array(
                         'code'    => $icon['id'],
                         'type'    => 'fa',
-                        'name'    => $icon['name'],
+                        'name'    => $friendly_name,
                         'tags'    => implode(' ', $tags)
                     );
                 }
@@ -301,11 +319,14 @@ class HarvestIcons extends Command
                     // Remove any duplicates
                     $tags = array_unique($tags);
                     
+                    // Make name search-friendly 
+                    $friendly_name = $this->fixName($value);
+                    
                     // Build array
                     $formatted[] = array(
                         'code'    => $key,
                         'type'    => 'wp',
-                        'name'    => ucfirst($value),
+                        'name'    => $friendly_name,
                         'tags'    => implode(' ', $tags)
                     );
                 }
