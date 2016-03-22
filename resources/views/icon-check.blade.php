@@ -72,7 +72,7 @@
         <h2>Font Awesome ({{ count($icons->fa) }})</h2>
         <div class="icons">
             @foreach ($icons->fa as $icon)
-            <div class="icon">
+            <div class="icon" title="{{ $icon->name }}">
                 <i class="fa fa-{{ $icon->code }}"></i>
             </div>
             @endforeach
@@ -83,7 +83,7 @@
         <h2>Google Material Design ({{ count($icons->gmi) }})</h2>
         <div class="icons">
             @foreach ($icons->gmi as $icon)
-            <div class="icon">
+            <div class="icon" title="{{ $icon->name }}">
                 <i class="material-icons">&#x{{ $icon->code }};</i>
             </div>
             @endforeach
@@ -94,7 +94,7 @@
         <h2>7 Stroke ({{ count($icons->{'7-stroke'}) }})</h2>
         <div class="icons">
             @foreach ($icons->{'7-stroke'} as $icon)
-            <div class="icon">
+            <div class="icon" title="{{ $icon->name }}">
                 <i class="pe-7s-{{ $icon->code }}"></i>
             </div>
             @endforeach
@@ -105,7 +105,7 @@
         <h2>WP Dashicons ({{ count($icons->dashicons) }})</h2>
         <div class="icons">
             @foreach ($icons->dashicons as $icon)
-            <div class="icon">
+            <div class="icon" title="{{ $icon->name }}">
                 <span class="dashicons dashicons-{{ $icon->code }}"></span>
             </div>
             @endforeach
