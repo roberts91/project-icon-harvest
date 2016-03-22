@@ -78,7 +78,7 @@ class HarvestIcons extends Command
             $icon = new Icon;
             
             // Check if exists
-            $icon = $icon->where('icon_id', '=', $i['icon_id'])->first();
+            $icon = $icon->where('code', '=', $i['code'])->where('type', '=', $i['type'])->first();
             
             // Check if exists
             if ($icon === null)
@@ -96,7 +96,7 @@ class HarvestIcons extends Command
             else
             {
                 // Get row
-                $icon_check = $icon->where('icon_id', '=', $i['icon_id'])->get()->first()->toArray();
+                $icon_check = $icon->where('code', '=', $i['code'])->where('type', '=', $i['type'])->get()->first()->toArray();
                 
                 // Unset Laravel-specific fields
                 unset($icon_check['id']);
@@ -186,12 +186,8 @@ class HarvestIcons extends Command
                     // Get name
                     $name = $value->name;
                     
-                    // Build ID
-                    $id = 'gmi-' . $key;
-                    
                     // Build array
                     $formatted[] = array(
-                        'icon_id' => $id,
                         'code'    => $key,
                         'type'    => 'gmi',
                         'name'    => $name,
@@ -220,9 +216,6 @@ class HarvestIcons extends Command
                         // Extract to values
                         list($string, $name, $code) = $matches;
                 
-                        // Build ID
-                        $id = '7s-' . $code;
-                
                         // Insert whitespace between text and numbers
                         $friendly_name = preg_replace('/([0-9]+)/', ' $1', $name);
                 
@@ -237,7 +230,6 @@ class HarvestIcons extends Command
             
                         // Build array
                         $formatted[] = array(
-                            'icon_id' => $id,
                             'code'    => $name,
                             'type'    => '7-stroke',
                             'name'    => $friendly_name,
@@ -282,12 +274,8 @@ class HarvestIcons extends Command
                     // Remove duplicates
                     $tags = array_unique($tags);
                     
-                    // Build ID
-                    $id = 'fa-' . $icon['unicode'];
-                    
                     // Build array
                     $formatted[] = array(
-                        'icon_id' => $id,
                         'code'    => $icon['id'],
                         'type'    => 'fa',
                         'name'    => $icon['name'],
@@ -307,9 +295,6 @@ class HarvestIcons extends Command
                 foreach($icons as $key => $value)
                 {
                     
-                    // Build id
-                    $id = 'wp-' . $key;
-                    
                     // Build tags
                     $tags = array('dashicon', 'dashicons', $key, $value);
                     
@@ -318,7 +303,6 @@ class HarvestIcons extends Command
                     
                     // Build array
                     $formatted[] = array(
-                        'icon_id' => $id,
                         'code'    => $key,
                         'type'    => 'wp',
                         'name'    => ucfirst($value),

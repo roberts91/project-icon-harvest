@@ -14,7 +14,6 @@ class Icons extends Migration
     {
         Schema::create('icons', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('icon_id')->unique();
             $table->string('code');
             $table->string('type');
             $table->string('name');

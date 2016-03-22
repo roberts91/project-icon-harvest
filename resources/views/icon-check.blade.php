@@ -4,12 +4,27 @@
         <title>Icon check</title>
 
         <!-- Dependencies for icons -->
-        <link rel="stylesheet" href="{{ $icon_files->gmi->frontend }}">
-        <link rel="stylesheet" href="{{ $icon_files->fa->frontend }}">
-        <link rel="stylesheet" href="{{ asset($icon_files->{'7-stroke'}->frontend) }}">
-
+        <link href="{{ $icon_files->gmi->frontend }}" rel="stylesheet" type="text/css">
+        <link href="{{ $icon_files->fa->frontend }}" rel="stylesheet" type="text/css">
+        <link href="{{ asset($icon_files->{'7-stroke'}->frontend) }}" rel="stylesheet" type="text/css">
+        <link href="{{ asset($icon_files->wp->frontend) }}" rel="stylesheet" type="text/css">
+        
+        <!-- Fonts -->
+        <link href="https://fonts.googleapis.com/css?family=Lato:100" rel="stylesheet" type="text/css">
+        
         <!-- Styles -->
         <style>
+            
+            h1 {
+                font-family: 'Lato';
+                text-decoration: underline;
+                margin-bottom: 0;
+            }
+            
+            small {
+                font-family: 'Lato';
+                font-size: 17px;
+            }
             
             h2 {
                 clear:both;
@@ -17,6 +32,7 @@
                 width:100%;
                 margin-top:15px;
                 margin-bottom: 5px;
+                font-family: 'Lato';
             }
             
             .icons {
@@ -49,6 +65,9 @@
     <body>
         
         <h1>Icon check</h1>
+        <small>Project Icon Harvest</small>
+        
+        <h2>Total count: {{ $icon_count }}</h2>
             
         <h2>Font Awesome ({{ count($icons->fa) }})</h2>
         <div class="icons">
@@ -70,11 +89,24 @@
             @endforeach
         </div>
         
+        <div class="clearfix"></div>
+        
         <h2>7 Stroke ({{ count($icons->{'7-stroke'}) }})</h2>
         <div class="icons">
             @foreach ($icons->{'7-stroke'} as $icon)
             <div class="icon">
                 <i class="pe-7s-{{ $icon->code }}"></i>
+            </div>
+            @endforeach
+        </div>
+        
+        <div class="clearfix"></div>
+        
+        <h2>WP Dashicons ({{ count($icons->dashicons) }})</h2>
+        <div class="icons">
+            @foreach ($icons->dashicons as $icon)
+            <div class="icon">
+                <span class="dashicons dashicons-{{ $icon->code }}"></span>
             </div>
             @endforeach
         </div>

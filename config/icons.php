@@ -25,6 +25,10 @@ return [
             'source'    => 'https://raw.githubusercontent.com/olimsaidov/pixeden-stroke-7-icon/master/pe-icon-7-stroke/scss/_variables.scss',
             'frontend'  => 'assets/icon-providers/pe-icon-7-stroke/css/pe-icon-7-stroke.css'
         ],
+        'wp' => (object) [
+            'source'    => 'assets/icon-providers/wp-dashicons/css/dashicons.css',
+            'frontend'  => 'assets/icon-providers/wp-dashicons/css/dashicons.min.css'
+        ],
     ],
 
 ];
