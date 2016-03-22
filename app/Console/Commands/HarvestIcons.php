@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use Log;
+use Mail;
+use Config;
 use App\Icon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Console\Command;
@@ -23,7 +25,7 @@ class HarvestIcons extends Command
      *
      * @var string
      */
-    protected $description = 'Harvest icons from Font Awesome and Google Material Design and push them to Algolia.';
+    protected $description = 'Harvest icons from icon-providers and push them to Algolia.';
 
     /**
      * Class constrcutor
@@ -33,7 +35,7 @@ class HarvestIcons extends Command
         parent::__construct();
         
         // Get file urls
-        $this->files = $this->get_files();
+        $this->files = Config::get('icons.files', []);
     }
     
     /**
@@ -45,11 +47,11 @@ class HarvestIcons extends Command
         Log::info('Starting IconHarvest');
         
         // Google Material Design Icons
-        $material_icons = $this->fetch( 'json', array( 'url' => $this->files->google ) );
-        $mi_formatted   = $this->formatResult( $material_icons, 'material_icons' );
+        $material_icons = $this->fetch( 'json', array( 'url' => $this->files->gmi->source ) );
+        $mi_formatted   = $this->formatResult( $material_icons, 'gmi' );
         
         // Font Awesome
-        $font_awesome   = $this->fetch( 'yaml', array( 'url' => $this->files->fa ) );
+        $font_awesome   = $this->fetch( 'yaml', array( 'url' => $this->files->fa->source ) );
         $fa_formatted   = $this->formatResult( $font_awesome, 'fa' );
         
         // Dashicons
@@ -57,7 +59,7 @@ class HarvestIcons extends Command
         $dashicons_formatted = $this->formatResult( $dashicons, 'wp' );
 
         // 7 Stroke
-        $seven_stroke           = $this->fetch( 'raw', array( 'url' => $this->files->{'7-stroke'} ) );
+        $seven_stroke           = $this->fetch( 'raw', array( 'url' => $this->files->{'7-stroke'}->source ) );
         $seven_stroke_formatted = $this->formatResult( $seven_stroke, '7-stroke' );
         
         // Merge all icons
@@ -124,20 +126,6 @@ class HarvestIcons extends Command
     }
     
     /**
-     * Get array of files containing icons
-     *
-     * @return object
-     */
-    private function get_files()
-    {
-        return (object) [
-            'google'   => 'https://raw.githubusercontent.com/google/material-design-icons/master/iconfont/MaterialIcons-Regular.ijmap',
-            'fa'       => 'https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/src/icons.yml',
-            '7-stroke' => storage_path('app/public/fonts/pixeden-7-stroke-_variables.scss'),
-        ];
-    }
-    
-    /**
      * Remove blacklisten words from array of words
      *
      * @return array
@@ -185,7 +173,8 @@ class HarvestIcons extends Command
         // Determine provider
         switch($type)
         {
-            case 'material_icons':
+            // Google Material Icons
+            case 'gmi':
                 
                 // Get icons
                 $icons = $content->icons;
@@ -211,6 +200,8 @@ class HarvestIcons extends Command
                 }
                 
             break;
+            
+            // 7 Stroke
             case '7-stroke':
                 
                 // Explode to lines
@@ -219,34 +210,31 @@ class HarvestIcons extends Command
                 // Loop through lines
                 foreach($lines as $line)
                 {
-                    // Check if is an icon
-                    if(preg_match('/\$font-var-/', $line))
+                    // Check if is an icon and extract values
+                    if(preg_match('/^\$font-var-([a-z0-9\-]+)\: \"\\\([a-z0-9]+)\";/', $line, $matches))
                     {
-                        
-                        // Extract values
-                        preg_match('/^\$font-var-([a-z0-9]+)\: \"\\\([a-z0-9]+)\";/', $line, $matches);
-                        
+                
                         // Skip if we did not get correct result
                         if(count($matches) != 3) continue;
-                        
+                
                         // Extract to values
                         list($string, $name, $code) = $matches;
-                        
+                
                         // Build ID
                         $id = '7s-' . $code;
-                        
+                
                         // Insert whitespace between text and numbers
                         $friendly_name = preg_replace('/([0-9]+)/', ' $1', $name);
-                        
+                
                         // Replace hyphens with whitespace
                         $friendly_name = preg_replace('/-/', ' ', $friendly_name);
-                        
+                
                         // Remove multiple whitespaces
                         $friendly_name = preg_replace('/\s+/', ' ', $friendly_name);
-                        
+                
                         // Capitalize first letter
                         $friendly_name = ucfirst($friendly_name);
-                    
+            
                         // Build array
                         $formatted[] = array(
                             'icon_id' => $id,
@@ -255,11 +243,13 @@ class HarvestIcons extends Command
                             'name'    => $friendly_name,
                             'tags'    => null
                         );
-                        
+                
                     }
                 }
             
             break;
+            
+            // Font Awesome
             case 'fa':
             
                 // Get icons
@@ -306,6 +296,8 @@ class HarvestIcons extends Command
                 }
                 
             break;
+            
+            // WordPress
             case 'wp':
             
                 // Get icons
@@ -343,6 +335,16 @@ class HarvestIcons extends Command
         // Return result
         return $formatted;
     }
+    
+    /**
+     * Sends a notification mail
+     */
+    private function sendErrorNotice($args = [], $to = 'robert.sather@outlook.com')
+    {
+        Mail::send('emails.notice', $args, function ($m) use ($to) {
+            $m->to($to)->subject('Error - Project Icon Harvest');
+        });
+    }
 
     /**
      * Fetch content of file and decode in either JSON og YAML
@@ -366,12 +368,29 @@ class HarvestIcons extends Command
                 // Check if result is empty
                 if(empty($content))
                 {
-                    // TODO: Make trigger to tell me somthing is wrong
+                    // Notify
+                    $this->sendErrorNotice([
+                        'text' => 'Empty content from json-file ' . $url
+                    ]);
+                    
+                    // Log
+                    Log::info('Empty content from json-file ' . $url);
+                    
+                    // Failed
+                    return false;
                 }
             
                 // Try decoding
                 if(!$result = json_decode($content))
                 {
+                    // Notify
+                    $this->sendErrorNotice([
+                        'text' => 'Could not json-decode file ' . $url
+                    ]);
+                        
+                    // Log
+                    Log::info('Could not json-decode file ' . $url);
+                    
                     // Failed
                     return false;
                 }
@@ -391,7 +410,16 @@ class HarvestIcons extends Command
                 // Check if result is empty
                 if(empty($content))
                 {
-                    // TODO: Make trigger to tell me somthing is wrong
+                    // Notify
+                    $this->sendErrorNotice([
+                        'text' => 'Empty content from yaml-file ' . $url
+                    ]);
+
+                    // Log
+                    Log::info('Empty content from yaml-file ' . $url);
+
+                    // Failed
+                    return false;
                 }
             
                 // Defining new parser
@@ -400,6 +428,14 @@ class HarvestIcons extends Command
                 // Try to parse
                 if(!$result = $yaml->parse($content))
                 {
+                    // Notify
+                    $this->sendErrorNotice([
+                        'text' => 'Could not yaml-parse file ' . $url
+                    ]);
+                        
+                    // Log
+                    Log::info('Could not yaml-parse file ' . $url);
+                    
                     // Failed
                     return false;
                 }
@@ -413,14 +449,23 @@ class HarvestIcons extends Command
                 // Get url
                 $url = $args['url'];
         
-                // Checj if file exists
-                if(!file_exists($url))
-                {
-                    return false;
-                }
-        
                 // Fetch content
                 $content = file_get_contents($url);
+                
+                // Check if result is empty
+                if(empty($content))
+                {
+                    // Notify
+                    $this->sendErrorNotice([
+                        'text' => 'Empty content from raw-file ' . $url
+                    ]);
+                        
+                    // Log
+                    Log::info('Empty content from raw-file ' . $url);
+                    
+                    // Failed
+                    return false;
+                }
                 
                 // Return content
                 return $content;
