@@ -166,6 +166,14 @@ class HarvestIcons extends Command
      */
     private function fixName($name)
     {
+        
+        // Check if name ends with "-o" and that it doesnt have "outlined" in it
+        if(preg_match('/\-o$/', $name) AND !preg_match('/outlined/i', $name))
+        {
+            // This is an outlined icon, add outline-text
+            $name .= ' Outlined';
+        }
+        
         // Insert whitespace between text and numbers
         $name = preg_replace('/([0-9]+)/', ' $1', $name);
 

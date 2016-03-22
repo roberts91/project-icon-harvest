@@ -19,6 +19,7 @@ class IconCheckController extends Controller
      */
     public function index()
     {
+        
         // Get icons
         $icons = (object) [
             'fa'        => Icon::where('type', 'fa')->get(),
