@@ -47,8 +47,8 @@ class HarvestIcons extends Command
         Log::info('Starting IconHarvest');
         
         // Google Material Design Icons
-        $material_icons = $this->fetch( 'json', array( 'url' => $this->files->gmi->source ) );
-        $mi_formatted   = $this->formatResult( $material_icons, 'gmi' );
+        $material_icons           = $this->fetch( 'json', array( 'url' => $this->files->gmi->source ) );
+        $material_icons_formatted = $this->formatResult( $material_icons, 'gmi' );
         
         // Font Awesome
         $font_awesome   = $this->fetch( 'yaml', array( 'url' => $this->files->fa->source ) );
@@ -64,7 +64,7 @@ class HarvestIcons extends Command
         
         // Merge all icons
         $all_icons = array_merge(
-            $mi_formatted, 
+            $material_icons_formatted, 
             $fa_formatted,
             $dashicons_formatted,
             $seven_stroke_formatted
@@ -253,7 +253,7 @@ class HarvestIcons extends Command
                         
                         // Make name search-friendly 
                         $friendly_name = $this->fixName($name);
-            
+        
                         // Build array
                         $formatted[] = array(
                             'code'    => $name,
